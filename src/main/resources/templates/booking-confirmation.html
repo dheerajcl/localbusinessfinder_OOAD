@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: headerfiles(title='Booking Confirmed')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="alert alert-success d-flex align-items-center mb-4">
+                    <i class="bi bi-check-circle-fill me-3 fs-3"></i>
+                    <div>
+                        <h2 class="alert-heading mb-0">Booking Confirmed!</h2>
+                        <p class="mb-0">Your service has been successfully booked.</p>
+                    </div>
+                </div>
+
+                <div th:if="${booking}" class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-receipt me-2"></i>
+                                <span>Booking Details</span>
+                            </div>
+                            <span class="badge bg-primary">Receipt ID: <span th:text="${booking.id}">12345</span></span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5 class="mb-3"><i class="bi bi-building me-2"></i>Business Information</h5>
+                                <p class="mb-1"><strong>Name:</strong> <span th:text="${booking.business.name}">Quick Fix</span></p>
+                                <p class="mb-1"><strong>Toll-Free:</strong> <span th:text="${booking.business.tollFree}">1-800-QUICKFIX</span></p>
+                                <p class="mb-1"><strong>Serviceman Contact:</strong> <span th:text="${booking.servicemanContact}">(555) 123-4567</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="mb-3"><i class="bi bi-info-circle me-2"></i>Booking Information</h5>
+                                <p class="mb-1"><strong>Date & Time:</strong> <span th:text="${#temporals.format(booking.bookingDate, 'EEEE, MMMM d, yyyy ''at'' hh:mm a')}">March 15, 2025 at 10:00 AM</span></p>
+                                <p class="mb-1"><strong>Status:</strong> <span class="badge bg-success" th:text="${booking.status}">Confirmed</span></p>
+                                <p class="mb-1"><strong>Advance Paid:</strong> <span class="text-success" th:text="${#numbers.formatCurrency(booking.advancePaid)}">$20.00</span></p>
+                            </div>
+                        </div>
+                        
+                        <h5 class="mb-3"><i class="bi bi-chat-left-text me-2"></i>Service Issue</h5>
+                        <div class="p-3 bg-light rounded mb-4">
+                            <p class="mb-0" th:text="${booking.issueDescription}">Leaky pipe under the kitchen sink that needs to be fixed.</p>
+                        </div>
+                        
+                        <div class="alert alert-warning d-flex">
+                            <i class="bi bi-exclamation-triangle me-3 fs-4"></i>
+                            <div>
+                                <h5 class="alert-heading">Cancellation Policy</h5>
+                                <p class="mb-0">
+                                    You can cancel this booking up to <strong th:text="${@appConfig.cancellationGraceHours}">3</strong> hours before the appointment time.
+                                    After that, the advance payment is non-refundable.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <a th:href="@{/bookings/my}" class="btn btn-primary">
+                                <i class="bi bi-journal-text me-2"></i>View My Bookings
+                            </a>
+                            <a th:href="@{/search}" class="btn btn-outline-secondary">
+                                <i class="bi bi-search me-2"></i>Book Another Service
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

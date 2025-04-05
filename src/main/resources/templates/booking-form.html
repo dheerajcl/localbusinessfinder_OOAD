@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: headerfiles(title='Book Service')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="bi bi-calendar-plus me-2"></i>Book Service</h2>
+                    <a th:href="@{/search}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Search
+                    </a>
+                </div>
+
+                <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                </div>
+                
+                <div th:if="${#fields.hasErrors('${bookingRequest.*}')}" class="alert alert-danger">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>
+                    <ul class="mb-0">
+                        <li th:each="err : ${#fields.errors('${bookingRequest.*}')}" th:text="${err}" />
+                    </ul>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-building me-2"></i>
+                            <h5 class="mb-0" th:text="${business.name}">Business Name</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><i class="bi bi-geo-alt me-2"></i><span th:text="${business.address}">Address</span></p>
+                                <p><i class="bi bi-pin-map me-2"></i><span th:text="${business.city + ', ' + business.state + ' ' + business.zip}">City, ST ZIP</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><i class="bi bi-tag me-2"></i>Category: <strong th:text="${business.category}">Plumber</strong></p>
+                                <p class="text-success"><i class="bi bi-currency-dollar me-1"></i>Advance Payment: <strong th:text="${#numbers.formatCurrency(business.advanceAmount)}">$20.00</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-pencil-square me-2"></i>
+                            <h5 class="mb-0">Booking Details</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/book}" th:object="${bookingRequest}" method="post">
+                            <input type="hidden" th:field="*{businessId}" />
+                            
+                            <div class="mb-4">
+                                <label for="bookingDate" class="form-label">Selected Date & Time:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                    <input type="datetime-local" id="bookingDate" th:field="*{bookingDate}" class="form-control" readonly>
+                                </div>
+                                <span th:if="${#fields.hasErrors('bookingDate')}" th:errors="*{bookingDate}" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="issueDescription" class="form-label">Describe the Issue:</label>
+                                <textarea id="issueDescription" th:field="*{issueDescription}" class="form-control" rows="4" placeholder="Please provide details about the service you need..." required></textarea>
+                                <span th:if="${#fields.hasErrors('issueDescription')}" th:errors="*{issueDescription}" class="text-danger"></span>
+                            </div>
+
+                            <div class="alert alert-info d-flex align-items-center">
+                                <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+                                <div>
+                                    You will be required to pay an advance amount of
+                                    <strong th:text="${#numbers.formatCurrency(business.advanceAmount)}">$20.00</strong>
+                                    to confirm this booking. This amount will be deducted from the final price.
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-credit-card me-2"></i>Confirm Booking & Pay Advance
+                                </button>
+                                <a th:href="@{/search}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

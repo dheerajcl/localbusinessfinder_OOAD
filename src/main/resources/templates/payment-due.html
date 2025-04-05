@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: headerfiles(title='Final Payment')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-credit-card-2-front me-2"></i>Final Payment Due</h2>
+             <a th:href="@{/bookings/{id}(id=${booking?.id})}" class="btn btn-outline-secondary">
+                 <i class="bi bi-arrow-left me-2"></i>Back to Booking Details
+             </a>
+        </div>
+
+        <!-- Error Messages -->
+        <div th:if="${errorMessage}" class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div th:text="${errorMessage}">Error message here.</div>
+        </div>
+         <div th:if="${param.error}" class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>Payment processing failed. Please try again or contact support.</div>
+        </div>
+
+        <div th:if="${booking}" class="card shadow-sm">
+            <div class="card-header bg-light">
+                Booking ID: <strong th:text="${booking.id}">123</strong> for <strong th:text="${booking.business.name}">Business Name</strong>
+            </div>
+            <div class="card-body">
+                <p><strong>Service Date:</strong> <span th:text="${#temporals.format(booking.bookingDate, 'MMM d, yyyy')}"></span></p>
+                <p><strong>Status:</strong> <span class="badge bg-warning text-dark" th:text="${booking.status}">AWAITING_FINAL_PAYMENT</span></p>
+                <hr>
+                <p><strong>Advance Paid:</strong> <span th:text="${#numbers.formatCurrency(booking.advancePaid)}"></span></p>
+                <p><strong>Adjusted Price:</strong> <span th:text="${#numbers.formatCurrency(booking.adjustedPrice)}"></span></p>
+                <h4 class="text-danger">Amount Due: <span th:text="${#numbers.formatCurrency(amountDue)}"></span></h4>
+
+                <!-- Show payment form only if no error message prevents it -->
+                <form th:if="${errorMessage == null}"
+                      th:action="@{/bookings/{bookingId}/payFinal(bookingId=${booking.id})}"
+                      method="post"
+                      class="mt-4">
+
+                    <!-- Simulate Payment Button -->
+                    <p class="text-muted small">This is a simulation. Clicking below will mark the payment as complete.</p>
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle me-1"></i> Simulate Final Payment
+                    </button>
+                    <a th:href="@{/bookings/{id}(id=${booking.id})}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </form>
+
+                 <!-- Message if payment is not possible -->
+                 <div th:if="${errorMessage != null}" class="text-center mt-3">
+                      <a th:href="@{/bookings/{id}(id=${booking.id})}" class="btn btn-secondary">Return to Booking Details</a>
+                 </div>
+            </div>
+        </div>
+         <div th:unless="${booking}" class="alert alert-danger">
+            Booking details could not be loaded for payment.
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

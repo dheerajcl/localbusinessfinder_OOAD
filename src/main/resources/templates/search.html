@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: headerfiles(title='Search Services')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col-md-8 offset-md-2 text-center">
+                <h2 class="mb-3">Find Local Business Services</h2>
+                <p class="lead">Search by name or criteria to find and book services.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <form th:action="@{/results}" method="get">
+                            <div class="row g-3">
+                                <!-- Option 1: Search by Criteria -->
+                                <div class="col-12">
+                                    <h5 class="card-title"><i class="bi bi-geo-alt-fill me-2"></i>Search by Criteria</h5>
+                                    <hr>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="city" class="form-label">Location (City):</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                        <input type="text" id="city" name="city" class="form-control" placeholder="e.g., Seattle">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="category" class="form-label">Category:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-tags"></i></span>
+                                        <input type="text" id="category" name="category" class="form-control" placeholder="e.g., Plumber, Electrician">
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mt-4">
+                                    <h5 class="card-title"><i class="bi bi-search me-2"></i>Search by Business Name</h5>
+                                    <hr>
+                                </div>
+                                <div class="col-12">
+                                    <label for="name" class="form-label">Business Name:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-shop"></i></span>
+                                        <input type="text" id="name" name="name" class="form-control" placeholder="e.g., Quick Fix Plumbing">
+                                    </div>
+                                    <div class="form-text">If you provide a name, location/category filters below will be ignored for this specific search.</div>
+                                </div>
+
+                                <div class="col-12 mt-4">
+                                    <h5 class="card-title"><i class="bi bi-sliders me-2"></i>Date & Filters</h5>
+                                    <hr>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="dateTime" class="form-label">Desired Date & Time:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                                        <input type="datetime-local" id="dateTime" name="dateTime" class="form-control" required
+                                               th:value="${#temporals.format(now, 'yyyy-MM-dd''T''HH:mm')}">
+                                    </div>
+                                    <div class="form-text">Select the time slot you need.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="priceRange" class="form-label">Max Price Range:</label>
+                                    <select id="priceRange" name="priceRange" class="form-select">
+                                        <option value="">Any</option>
+                                        <option value="1">$ (Budget)</option>
+                                        <option value="2">$$ (Mid-range)</option>
+                                        <option value="3">$$$ (Premium)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="minRating" class="form-label">Minimum Rating:</label>
+                                    <select id="minRating" name="minRating" class="form-select">
+                                        <option value="">Any</option>
+                                        <option value="1">1+ <i class="bi bi-star-fill text-warning"></i></option>
+                                        <option value="2">2+ <i class="bi bi-star-fill text-warning"></i></option>
+                                        <option value="3">3+ <i class="bi bi-star-fill text-warning"></i></option>
+                                        <option value="4">4+ <i class="bi bi-star-fill text-warning"></i></option>
+                                        <option value="5">5 <i class="bi bi-star-fill text-warning"></i></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-search me-2"></i>Search Available Services
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

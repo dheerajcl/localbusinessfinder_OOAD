@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: headerfiles(title='Register')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Register New Customer</h2>
+
+        <!-- Display general error message -->
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+         <!-- Display validation errors -->
+        <div th:if="${#fields.hasErrors('${customerDto.*}')}" class="alert alert-danger">
+            <ul>
+                <li th:each="err : ${#fields.errors('${customerDto.*}')}" th:text="${err}" />
+            </ul>
+        </div>
+
+
+        <form th:action="@{/register}" th:object="${customerDto}" method="post" class="col-md-6 offset-md-3">
+            <div class="mb-3">
+                <label for="name" class="form-label">Full Name:</label>
+                <input type="text" id="name" th:field="*{name}" class="form-control" required>
+                 <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" id="email" th:field="*{email}" class="form-control" required>
+                 <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password:</label>
+                <input type="password" id="password" th:field="*{password}" class="form-control" required>
+                <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password:</label>
+                <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" required>
+                 <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Register</button>
+        </form>
+         <p class="text-center mt-3">
+            Already have an account? <a th:href="@{/login}">Login here</a>
+        </p>
+    </div>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

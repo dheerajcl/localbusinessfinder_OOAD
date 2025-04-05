@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: headerfiles(title='My Bookings')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-journal-text me-2"></i>My Bookings</h2>
+            <a th:href="@{/search}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Book New Service
+            </a>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <div th:text="${successMessage}"></div>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div th:text="${errorMessage}"></div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(bookings)}" class="alert alert-info d-flex align-items-center">
+            <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+            <div>
+                <p class="mb-0">You have no bookings yet.</p>
+                <a th:href="@{/search}" class="alert-link">Find a service now!</a>
+            </div>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(bookings)}">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <ul class="nav nav-tabs card-header-tabs" id="bookingTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="true">
+                                <i class="bi bi-calendar-event me-1"></i>Upcoming
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="false">
+                                <i class="bi bi-check-circle me-1"></i>Completed
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" type="button" role="tab" aria-controls="cancelled" aria-selected="false">
+                                <i class="bi bi-x-circle me-1"></i>Cancelled
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="bookingTabsContent">
+                        <div class="tab-pane fade show active" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Business</th>
+                                            <th scope="col">Date & Time</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="booking : ${bookings}" th:if="${booking.status.name() == 'CONFIRMED' or booking.status.name() == 'AWAITING_FINAL_PAYMENT'}">
+                                            <td th:text="${booking.id}">12345</td>
+                                            <td th:text="${booking.business.name}">Quick Fix</td>
+                                            <td th:text="${#temporals.format(booking.bookingDate, 'MMM d, yyyy - hh:mm a')}">Mar 15, 2025 - 10:00 AM</td>
+                                            <td>
+                                                <span class="badge"
+                                                      th:classappend="${booking.status.name() == 'CONFIRMED' ? 'bg-primary' : 'bg-warning text-dark'}"
+                                                      th:text="${booking.status}">Status</span>
+                                            </td>
+                                            <td class="text-nowrap">
+                                                <a th:href="@{/bookings/{id}(id=${booking.id})}" class="btn btn-sm btn-outline-secondary me-1" title="View Details">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <form th:if="${booking.status.name() == 'CONFIRMED' and booking.bookingTimestamp != null and #temporals.createNow().isBefore(booking.bookingTimestamp.plusHours(@appConfig.cancellationGraceHours))}"
+                                                      th:action="@{/bookings/{id}/cancel(id=${booking.id})}"
+                                                      method="post"
+                                                      class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                            onclick="return confirm('Are you sure you want to cancel this booking? The advance payment may not be refundable.')"
+                                                            title="Cancel Booking">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </button>
+                                                </form>
+                                                <form th:if="${booking.status.name() == 'CONFIRMED' and booking.bookingDate != null and #temporals.createNow().isAfter(booking.bookingDate)}"
+                                                      th:action="@{/bookings/{id}/mark-completed(id=${booking.id})}"
+                                                      method="post"
+                                                      class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-info"
+                                                            onclick="return confirm('Confirm that the service for this booking has been completed? This will prepare it for final payment.')"
+                                                            title="Mark Service as Completed">
+                                                        <i class="bi bi-check2-square"></i> Mark Completed
+                                                    </button>
+                                                </form>
+                                                <a th:if="${booking.status.name() == 'AWAITING_FINAL_PAYMENT'}"
+                                                   th:href="@{/bookings/{id}/pay(id=${booking.id})}"
+                                                   class="btn btn-sm btn-success"
+                                                   title="Pay Final Amount">
+                                                    <i class="bi bi-credit-card"></i> Pay Final
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(bookings.?[status.name() == 'CONFIRMED' or status.name() == 'AWAITING_FINAL_PAYMENT'])}">
+                                            <td colspan="5" class="text-center py-3">No upcoming bookings</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Business</th>
+                                            <th scope="col">Date & Time</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="booking : ${bookings}" th:if="${booking.status.name() == 'FULLY_PAID' or booking.status.name() == 'COMPLETED_PENDING_RATING' or booking.status.name() == 'COMPLETED_AND_RATED'}">
+                                            <td th:text="${booking.id}">12345</td>
+                                            <td th:text="${booking.business.name}">Quick Fix</td>
+                                            <td th:text="${#temporals.format(booking.bookingDate, 'MMM d, yyyy - hh:mm a')}">Mar 15, 2025 - 10:00 AM</td>
+                                            <td>
+                                                <span class="badge bg-success" th:text="${booking.status}">Status</span>
+                                            </td>
+                                            <td class="text-nowrap">
+                                                <a th:href="@{/bookings/{id}(id=${booking.id})}" class="btn btn-sm btn-outline-secondary me-1" title="View Details">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a th:if="${booking.status.name() == 'FULLY_PAID' or booking.status.name() == 'COMPLETED_PENDING_RATING'}" 
+                                                   th:href="@{/bookings/{id}/rate(id=${booking.id})}" 
+                                                   class="btn btn-sm btn-warning" 
+                                                   title="Rate Service">
+                                                    <i class="bi bi-star-fill"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(bookings.?[status.name() == 'FULLY_PAID' or status.name() == 'COMPLETED_PENDING_RATING' or status.name() == 'COMPLETED_AND_RATED'])}">
+                                            <td colspan="5" class="text-center py-3">No completed bookings</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="cancelled" role="tabpanel" aria-labelledby="cancelled-tab">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Business</th>
+                                            <th scope="col">Date & Time</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="booking : ${bookings}" th:if="${booking.status.name() == 'CANCELLED'}">
+                                            <td th:text="${booking.id}">12345</td>
+                                            <td th:text="${booking.business.name}">Quick Fix</td>
+                                            <td th:text="${#temporals.format(booking.bookingDate, 'MMM d, yyyy - hh:mm a')}">Mar 15, 2025 - 10:00 AM</td>
+                                            <td>
+                                                <span class="badge bg-secondary" th:text="${booking.status}">Status</span>
+                                            </td>
+                                            <td>
+                                                <a th:href="@{/bookings/{id}(id=${booking.id})}" class="btn btn-sm btn-outline-secondary" title="View Details">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(bookings.?[status.name() == 'CANCELLED'])}">
+                                            <td colspan="5" class="text-center py-3">No cancelled bookings</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

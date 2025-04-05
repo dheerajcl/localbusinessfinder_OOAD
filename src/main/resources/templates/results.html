@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: headerfiles(title='Search Results')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-list-check me-2"></i>Search Results</h2>
+            <a th:href="@{/search}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>New Search
+            </a>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <div th:if="${searchPerformed}">
+            <div class="alert alert-info" th:if="${#lists.isEmpty(businesses)}">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                No businesses found matching your criteria for the selected date and time.
+            </div>
+
+            <div th:if="${!#lists.isEmpty(businesses)}">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-calendar-check me-2"></i>
+                            Available businesses for 
+                            <strong th:text="${#temporals.format(searchDateTime, 'EEEE, MMMM d, yyyy HH:mm a')}"></strong>
+                        </h5>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div th:each="business : ${businesses}" class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${business.name}">Business Name</h5>
+                                <p class="card-text">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    <span th:text="${business.city + ', ' + business.state}">City, State</span>
+                                </p>
+                                <p class="card-text">
+                                    <i class="bi bi-tag me-1"></i>
+                                    <span th:text="${business.category}">Category</span>
+                                </p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="rating-stars">
+                                        <i class="bi bi-star-fill" th:each="i : ${#numbers.sequence(1, business.rating)}"></i>
+                                        <span class="ms-1" th:text="${business.rating}">4.5</span>
+                                    </div>
+                                    <div class="price-range-display">
+                                        <span th:text="${#strings.repeat('$', business.priceRange)}">$$$</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-auto d-grid gap-2">
+                                    <a th:href="@{/businesses/{id}(id=${business.id})}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-info-circle me-1"></i>Details
+                                    </a>
+                                    <a th:href="@{/book/{id}(id=${business.id}, dateTime=${#temporals.format(searchDateTime, 'yyyy-MM-dd''T''HH:mm:ss')})}"
+                                       class="btn btn-primary btn-sm">
+                                       <i class="bi bi-calendar-plus me-1"></i>Book Now
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:unless="${searchPerformed}" class="text-center my-5">
+            <i class="bi bi-search" style="font-size: 3rem;"></i>
+            <p class="lead mt-3">Perform a search to see results.</p>
+            <a th:href="@{/search}" class="btn btn-primary">Go to Search</a>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

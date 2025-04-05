@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: headerfiles(title='Rate Service')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-star-half me-2"></i>Rate Your Experience</h2>
+            <a th:href="@{/bookings/my}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Back to My Bookings
+            </a>
+        </div>
+
+        <!-- Error Messages -->
+        <div th:if="${errorMessage}" class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div th:text="${errorMessage}">Error message here.</div>
+        </div>
+         <div th:if="${param.error}" class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>Rating submission failed. Please check your input.</div>
+        </div>
+         <div th:if="${param.success}" class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <div>Thank you for your rating!</div>
+            <!-- Optional: Redirect after a delay or provide link back -->
+             <script>
+                 setTimeout(() => { window.location.href = '/bookings/my'; }, 3000);
+             </script>
+        </div>
+
+
+        <div th:if="${booking}" class="card shadow-sm mb-4">
+             <div class="card-header bg-light">
+                 Booking ID: <strong th:text="${booking.id}">123</strong> for <strong th:text="${booking.business.name}">Business Name</strong>
+             </div>
+             <div class="card-body">
+                 <p><strong>Service Date:</strong> <span th:text="${#temporals.format(booking.bookingDate, 'MMM d, yyyy')}"></span></p>
+
+                 <!-- Show form only if no error message exists (like 'already rated' or 'not allowed') -->
+                 <form th:if="${errorMessage == null and param.success == null}"
+                       th:action="@{/bookings/{bookingId}/rate(bookingId=${booking.id})}"
+                       th:object="${ratingDto}"
+                       method="post">
+
+                     <input type="hidden" th:field="*{bookingId}" />
+
+                     <div class="mb-3">
+                         <label for="ratingValue" class="form-label">Rating (1-5 stars):</label>
+                         <select id="ratingValue" th:field="*{ratingValue}" class="form-select" th:errorclass="is-invalid" required>
+                             <option value="">-- Select Rating --</option>
+                             <option value="5">★★★★★ (Excellent)</option>
+                             <option value="4">★★★★☆ (Good)</option>
+                             <option value="3">★★★☆☆ (Average)</option>
+                             <option value="2">★★☆☆☆ (Poor)</option>
+                             <option value="1">★☆☆☆☆ (Terrible)</option>
+                         </select>
+                         <div th:if="${#fields.hasErrors('ratingValue')}" th:errors="*{ratingValue}" class="invalid-feedback">Rating is required.</div>
+                     </div>
+
+                     <div class="mb-3">
+                         <label for="comment" class="form-label">Comment (Optional):</label>
+                         <textarea id="comment" th:field="*{comment}" class="form-control" rows="3" th:errorclass="is-invalid"></textarea>
+                          <div th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}" class="invalid-feedback">Comment error.</div>
+                     </div>
+
+                     <button type="submit" class="btn btn-primary">
+                         <i class="bi bi-send-check me-1"></i>Submit Rating
+                     </button>
+                     <a th:href="@{/bookings/my}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                 </form>
+
+                 <!-- Message if rating is not possible -->
+                 <div th:if="${errorMessage != null or param.success != null}" class="text-center mt-3">
+                      <a th:href="@{/bookings/my}" class="btn btn-secondary">Return to My Bookings</a>
+                 </div>
+             </div>
+        </div>
+
+        <div th:unless="${booking}" class="alert alert-danger">
+            Booking details could not be loaded for rating.
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

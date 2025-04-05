@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: headerfiles(title='Login')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Login</h2>
+
+        <!-- Display login error message -->
+        <div th:if="${param.error}" class="alert alert-danger" role="alert">
+            Invalid username or password.
+        </div>
+         <!-- Display logout message -->
+        <div th:if="${param.logout}" class="alert alert-success" role="alert">
+            You have been logged out.
+        </div>
+        <!-- Display registration success message -->
+         <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}">
+        </div>
+
+
+        <form th:action="@{/login}" method="post" class="col-md-6 offset-md-3">
+            <div class="mb-3">
+                <label for="username" class="form-label">Email:</label>
+                <input type="email" id="username" name="username" class="form-control" required autofocus>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password:</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+
+        <p class="text-center mt-3">
+            Don't have an account? <a th:href="@{/register}">Register here</a>
+        </p>
+    </div>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

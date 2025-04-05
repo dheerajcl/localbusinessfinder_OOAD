@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: headerfiles(title=${business.name})}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container mt-5">
+        <h2 th:text="${business.name}">Business Name</h2>
+        <h4 th:text="${business.category}" class="text-muted">Category</h4>
+
+        <div class="card mt-4">
+             <div class="card-header">Business Information</div>
+             <div class="card-body">
+                 <dl class="row">
+                     <dt class="col-sm-3">Address:</dt>
+                     <dd class="col-sm-9" th:text="${business.address + ', ' + business.city + ', ' + business.state + ' ' + business.zip}">Full Address</dd>
+
+                      <dt class="col-sm-3">Toll-Free:</dt>
+                     <dd class="col-sm-9" th:text="${business.tollFree}">1-800-NUMBER</dd>
+
+                      <dt class="col-sm-3">Price Range:</dt>
+                      <dd class="col-sm-9 price-range-display"
+                            th:text="${business.priceRange == 1 ? '$' : (business.priceRange == 2 ? '$$' : (business.priceRange == 3 ? '$$$' : 'N/A'))}"></dd>
+
+                     <dt class="col-sm-3">Current Rating:</dt>
+                     <dd class="col-sm-9 rating-stars" th:text="${#numbers.formatDecimal(business.rating, 1, 1)} + ' / 5.0 ★'">4.8 / 5.0 ★</dd>
+
+                     <dt class="col-sm-3">Advance Payment Required:</dt>
+                     <dd class="col-sm-9 fw-bold" th:text="${#numbers.formatCurrency(business.advanceAmount)}">$20.00</dd>
+
+                     <dt class="col-sm-3">Description:</dt>
+                     <dd class="col-sm-9" th:text="${business.description}">Business description goes here.</dd>
+
+                     <!-- Add more details if needed - hours, services list, etc. -->
+
+                 </dl>
+             </div>
+        </div>
+
+         <!-- Placeholder for reviews/ratings list if implemented -->
+         <!-- <div class="mt-4">
+             <h5>Reviews</h5>
+             <p>Customer reviews would be displayed here.</p>
+         </div> -->
+
+
+        <div class="mt-4">
+            <a th:href="@{/search}" class="btn btn-secondary">Back to Search</a>
+             <!-- Optional: Link to book directly if applicable, might need date context -->
+             <!-- <a href="#" class="btn btn-primary">Book This Service</a> -->
+        </div>
+
+    </div>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>
