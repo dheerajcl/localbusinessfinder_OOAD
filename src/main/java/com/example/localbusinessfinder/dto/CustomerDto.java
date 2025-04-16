@@ -26,7 +26,14 @@ public class CustomerDto {
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
 
-    // You might add a confirmPassword field similar to BusinessAdminDto if needed for validation
-    // @NotEmpty(message = "Please confirm your password")
-    // private String confirmPassword;
+    @NotEmpty(message = "Please confirm your password")
+    private String confirmPassword;
+    
+    // Constructor without confirmPassword for service layer usage
+    public CustomerDto(Long id, String name, String email, String password) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
 } 

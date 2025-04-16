@@ -18,7 +18,13 @@
             --text-color: #212529;
             --body-bg: #ffffff;
             --navbar-height: 60px; /* Consistent navbar height */
+            --footer-height: 80px; /* Footer height for sticky footer */
             --border-radius: 0.375rem; /* Bootstrap default */
+        }
+
+        html {
+            height: 100%; /* Full page height */
+            position: relative;
         }
 
         body {
@@ -27,10 +33,20 @@
             background-color: var(--body-bg);
             color: var(--text-color);
             line-height: 1.6;
+            min-height: 100vh; /* Minimum height of viewport */
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding-bottom: var(--footer-height); /* Space for footer */
         }
 
         .container {
             max-width: 1140px; /* Slightly wider container for modern screens */
+        }
+
+        /* Main content wrapper to push footer down */
+        .content-wrapper {
+            flex: 1 0 auto; /* Grow to fill available space */
         }
 
         /* --- Navbar --- */
@@ -116,13 +132,16 @@
 
         /* --- Footer --- */
         .footer {
-            margin-top: 3rem;
-            padding: 1.5rem 0;
             background-color: var(--light-gray);
             border-top: 1px solid var(--medium-gray);
             text-align: center;
             color: var(--dark-gray);
             font-size: 0.9rem;
+            padding: 1.5rem 0;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: var(--footer-height);
         }
 
         /* --- Utility --- */
@@ -206,7 +225,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6 text-md-start text-center">
-                    <span>© 2024 Local Business Service Finder</span>
+                    <span>© 2025 Local Business Service Finder</span>
                 </div>
                 <div class="col-md-6 text-md-end text-center">
                     <a href="#" class="text-decoration-none me-3"><i class="bi bi-facebook"></i></a>

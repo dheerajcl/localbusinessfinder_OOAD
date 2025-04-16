@@ -3,47 +3,49 @@
 <head th:replace="~{fragments :: headerfiles(title='Admin Dashboard')}"></head>
 <body>
 <nav th:replace="~{fragments :: navbar}"></nav>
-<div class="container mt-5">
-    <h2><i class="bi bi-briefcase-fill me-2"></i>Admin Dashboard</h2>
-    <p>Welcome, <span sec:authentication="name">Admin User</span>!</p>
+<div class="content-wrapper">
+    <div class="container mt-5">
+        <h2><i class="bi bi-briefcase-fill me-2"></i>Admin Dashboard</h2>
+        <p>Welcome, <span sec:authentication="name">Admin User</span>!</p>
 
-    <!-- Messages -->
-    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-    <div th:if="${infoMessage}" class="alert alert-info" th:text="${infoMessage}"></div>
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        <div th:if="${infoMessage}" class="alert alert-info" th:text="${infoMessage}"></div>
 
 
-    <div th:if="${business}" class="card shadow-sm mt-4">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <span>Your Business Listing</span>
-            <a th:href="@{/admin/business/edit}" class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-pencil-square me-1"></i>Edit Listing
+        <div th:if="${business}" class="card shadow-sm mt-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <span>Your Business Listing</span>
+                <a th:href="@{/admin/business/edit}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-pencil-square me-1"></i>Edit Listing
+                </a>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title" th:text="${business.name}">Business Name</h5>
+                <h6 class="card-subtitle mb-2 text-muted" th:text="${business.category}">Category</h6>
+                <p class="card-text">
+                    <span th:text="${business.address}">Address</span><br>
+                    <span th:text="${business.city}">City</span>, <span th:text="${business.state}">ST</span> <span th:text="${business.zip}">ZIP</span><br>
+                    Phone: <span th:text="${business.phone ?: 'N/A'}">Phone</span><br>
+                    Price: <span th:text="${business.priceRange == 1 ? '$' : (business.priceRange == 2 ? '$$' : '$$$')}">$$</span> |
+                    Advance: <span th:text="${#numbers.formatCurrency(business.advanceAmount)}">$0.00</span>
+                </p>
+                <p class="card-text" th:text="${#strings.abbreviate(business.description, 200)}">Description...</p>
+                <!-- Add more details as needed -->
+            </div>
+        </div>
+
+        <div th:unless="${business}" class="alert alert-info mt-4">
+            <p th:text="${message != null ? message : 'You have not added your business listing yet.'}"></p>
+            <a th:href="@{/admin/business/new}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i>Add Your Business Now
             </a>
         </div>
-        <div class="card-body">
-            <h5 class="card-title" th:text="${business.name}">Business Name</h5>
-            <h6 class="card-subtitle mb-2 text-muted" th:text="${business.category}">Category</h6>
-            <p class="card-text">
-                <span th:text="${business.address}">Address</span><br>
-                <span th:text="${business.city}">City</span>, <span th:text="${business.state}">ST</span> <span th:text="${business.zip}">ZIP</span><br>
-                Phone: <span th:text="${business.phone ?: 'N/A'}">Phone</span><br>
-                Price: <span th:text="${business.priceRange == 1 ? '$' : (business.priceRange == 2 ? '$$' : '$$$')}">$$</span> |
-                Advance: <span th:text="${#numbers.formatCurrency(business.advanceAmount)}">$0.00</span>
-            </p>
-            <p class="card-text" th:text="${#strings.abbreviate(business.description, 200)}">Description...</p>
-            <!-- Add more details as needed -->
-        </div>
+
+        <!-- Potentially add sections for viewing bookings/ratings for THIS business later -->
+
     </div>
-
-    <div th:unless="${business}" class="alert alert-info mt-4">
-        <p th:text="${message != null ? message : 'You have not added your business listing yet.'}"></p>
-        <a th:href="@{/admin/business/new}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i>Add Your Business Now
-        </a>
-    </div>
-
-    <!-- Potentially add sections for viewing bookings/ratings for THIS business later -->
-
 </div>
 <footer th:replace="~{fragments :: footer}"></footer>
 </body>

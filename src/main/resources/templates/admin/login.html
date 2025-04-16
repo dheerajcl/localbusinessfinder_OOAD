@@ -3,46 +3,48 @@
 <head th:replace="~{fragments :: headerfiles(title='Admin Login')}"></head>
 <body>
 <nav th:replace="~{fragments :: navbar}"></nav>
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4><i class="bi bi-shield-lock-fill me-2"></i>Business Administrator Login</h4>
-                </div>
-                <div class="card-body">
-                    <!-- Login Error Message -->
-                    <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                        Invalid username or password.
+<div class="content-wrapper">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4><i class="bi bi-shield-lock-fill me-2"></i>Business Administrator Login</h4>
                     </div>
-                    <!-- Logout Message -->
-                    <div th:if="${param.logout}" class="alert alert-success" role="alert">
-                        You have been logged out successfully.
-                    </div>
-                     <!-- Registration Success Message -->
-                    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+                    <div class="card-body">
+                        <!-- Login Error Message -->
+                        <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                            Invalid username or password.
+                        </div>
+                        <!-- Logout Message -->
+                        <div th:if="${param.logout}" class="alert alert-success" role="alert">
+                            You have been logged out successfully.
+                        </div>
+                         <!-- Registration Success Message -->
+                        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
 
-                    <!-- **** Ensure form posts to /login **** -->
-                    <form th:action="@{/login}" method="post">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Email address:</label>
-                            <input type="email" class="form-control" id="username" name="username" placeholder="Enter email" required autofocus>
+                        <!-- **** Ensure form posts to /login **** -->
+                        <form th:action="@{/login}" method="post">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Email address:</label>
+                                <input type="email" class="form-control" id="username" name="username" placeholder="Enter email" required autofocus>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password:</label>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                            </div>
+                            <!-- Add Remember Me if needed -->
+                            <!-- <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="remember-me" name="remember-me">
+                                <label class="form-check-label" for="remember-me">Remember me</label>
+                            </div> -->
+                            <button type="submit" class="btn btn-primary w-100">Login as Admin</button>
+                        </form>
+                         <hr>
+                        <div class="text-center">
+                             <p>Need an Admin Account? <a th:href="@{/admin/register}">Register Here</a></p>
+                             <p>Are you a customer? <a th:href="@{/login}">Customer Login</a></p>
                         </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password:</label>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
-                        </div>
-                        <!-- Add Remember Me if needed -->
-                        <!-- <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="remember-me" name="remember-me">
-                            <label class="form-check-label" for="remember-me">Remember me</label>
-                        </div> -->
-                        <button type="submit" class="btn btn-primary w-100">Login as Admin</button>
-                    </form>
-                     <hr>
-                    <div class="text-center">
-                         <p>Need an Admin Account? <a th:href="@{/admin/register}">Register Here</a></p>
-                         <p>Are you a customer? <a th:href="@{/login}">Customer Login</a></p>
                     </div>
                 </div>
             </div>

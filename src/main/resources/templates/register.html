@@ -10,14 +10,14 @@
         <!-- Display general error message -->
         <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
          <!-- Display validation errors -->
-        <div th:if="${#fields.hasErrors('${customerDto.*}')}" class="alert alert-danger">
+        <div th:if="${#fields.hasErrors('${customer.*}')}" class="alert alert-danger">
             <ul>
-                <li th:each="err : ${#fields.errors('${customerDto.*}')}" th:text="${err}" />
+                <li th:each="err : ${#fields.errors('${customer.*}')}" th:text="${err}" />
             </ul>
         </div>
 
 
-        <form th:action="@{/register}" th:object="${customerDto}" method="post" class="col-md-6 offset-md-3">
+        <form th:action="@{/register/save}" th:object="${customer}" method="post" class="col-md-6 offset-md-3">
             <div class="mb-3">
                 <label for="name" class="form-label">Full Name:</label>
                 <input type="text" id="name" th:field="*{name}" class="form-control" required>
