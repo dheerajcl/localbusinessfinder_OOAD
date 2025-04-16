@@ -37,6 +37,7 @@
             display: flex;
             flex-direction: column;
             margin: 0;
+            position: relative;
             padding-bottom: var(--footer-height); /* Space for footer */
         }
 
@@ -47,6 +48,7 @@
         /* Main content wrapper to push footer down */
         .content-wrapper {
             flex: 1 0 auto; /* Grow to fill available space */
+            padding-bottom: var(--footer-height); /* Ensure space for footer */
         }
 
         /* --- Navbar --- */
@@ -140,6 +142,7 @@
             padding: 1.5rem 0;
             position: absolute;
             bottom: 0;
+            left: 0;
             width: 100%;
             height: var(--footer-height);
         }

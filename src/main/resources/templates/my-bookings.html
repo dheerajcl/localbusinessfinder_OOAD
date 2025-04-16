@@ -63,9 +63,9 @@
                                             <th scope="col">Date & Time</th>
                                             <th scope="col">Status</th>
                                             <th scope="col">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                    </tr>
+                </thead>
+                <tbody>
                                         <tr th:each="booking : ${bookings}" th:if="${booking.status.name() == 'CONFIRMED' or booking.status.name() == 'AWAITING_FINAL_PAYMENT'}">
                                             <td th:text="${booking.id}">12345</td>
                                             <td th:text="${booking.business.name}">Quick Fix</td>
@@ -74,7 +74,7 @@
                                                 <span class="badge"
                                                       th:classappend="${booking.status.name() == 'CONFIRMED' ? 'bg-primary' : 'bg-warning text-dark'}"
                                                       th:text="${booking.status}">Status</span>
-                                            </td>
+                        </td>
                                             <td class="text-nowrap">
                                                 <a th:href="@{/bookings/{id}(id=${booking.id})}" class="btn btn-sm btn-outline-secondary me-1" title="View Details">
                                                     <i class="bi bi-eye"></i>
@@ -88,7 +88,7 @@
                                                             title="Cancel Booking">
                                                         <i class="bi bi-x-circle"></i>
                                                     </button>
-                                                </form>
+                            </form>
                                                 <form th:if="${booking.status.name() == 'CONFIRMED' and booking.bookingDate != null and #temporals.createNow().isAfter(booking.bookingDate)}"
                                                       th:action="@{/bookings/{id}/mark-completed(id=${booking.id})}"
                                                       method="post"
@@ -98,8 +98,8 @@
                                                             title="Mark Service as Completed">
                                                         <i class="bi bi-check2-square"></i> Mark Completed
                                                     </button>
-                                                </form>
-                                                <a th:if="${booking.status.name() == 'AWAITING_FINAL_PAYMENT'}"
+                            </form>
+                            <a th:if="${booking.status.name() == 'AWAITING_FINAL_PAYMENT'}"
                                                    th:href="@{/bookings/{id}/pay(id=${booking.id})}"
                                                    class="btn btn-sm btn-success"
                                                    title="Pay Final Amount">
@@ -145,13 +145,13 @@
                                                    title="Rate Service">
                                                     <i class="bi bi-star-fill"></i>
                                                 </a>
-                                            </td>
-                                        </tr>
+                        </td>
+                    </tr>
                                         <tr th:if="${#lists.isEmpty(bookings.?[status.name() == 'FULLY_PAID' or status.name() == 'COMPLETED_PENDING_RATING' or status.name() == 'COMPLETED_AND_RATED'])}">
                                             <td colspan="5" class="text-center py-3">No completed bookings</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                    </tr>
+                </tbody>
+            </table>
                             </div>
                         </div>
                         

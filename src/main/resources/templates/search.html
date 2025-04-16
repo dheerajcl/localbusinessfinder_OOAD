@@ -1,6 +1,26 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments :: headerfiles(title='Search Services')}"></head>
+<head th:replace="~{fragments :: headerfiles(title='Search Services')}">
+    <style>
+        html {
+            height: 100%;
+            position: relative;
+        }
+        body {
+            min-height: 100vh;
+            padding-bottom: 100px; /* Provide space for the footer */
+            position: relative;
+        }
+        .content-wrapper {
+            padding-bottom: 80px; /* Match the footer height from CSS variables */
+        }
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
 <body>
     <nav th:replace="~{fragments :: navbar}"></nav>
 

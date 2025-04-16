@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments :: headerfiles(title='Register')}"></head>
+<head th:replace="~{fragments :: headerfiles(title='Register')}">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        .container {
+            min-height: 100%;
+            position: relative;
+        }
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
 <body>
     <nav th:replace="~{fragments :: navbar}"></nav>
 
