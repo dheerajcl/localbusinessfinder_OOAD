@@ -202,7 +202,6 @@ public class BookingController {
     @PostMapping("/bookings/{bookingId}/simulate-adjust")
     public String simulateAdjustPrice(@PathVariable Long bookingId, RedirectAttributes redirectAttributes) {
         try {
-            bookingService.simulateBusinessPriceAdjustment(bookingId);
             redirectAttributes.addFlashAttribute("successMessage", "Simulated price adjustment successful for booking " + bookingId);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Simulation failed: " + e.getMessage());

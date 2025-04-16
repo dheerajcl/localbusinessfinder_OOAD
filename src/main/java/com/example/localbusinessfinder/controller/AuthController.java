@@ -1,7 +1,8 @@
 // src/main/java/com/example/localbusinessfinder/controller/AuthController.java
 package com.example.localbusinessfinder.controller;
 
-import com.example.localbusinessfinder.dto.CustomerRegistrationDto;
+import com.example.localbusinessfinder.dto.CustomerDto;
+import com.example.localbusinessfinder.entity.Customer;
 import com.example.localbusinessfinder.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,36 +27,35 @@ public class AuthController {
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        model.addAttribute("customerDto", new CustomerRegistrationDto());
+        CustomerDto customer = new CustomerDto();
+        model.addAttribute("customer", customer);
         return "register"; // Renders register.html
     }
 
-    @PostMapping("/register")
-    public String registerCustomer(@Valid @ModelAttribute("customerDto") CustomerRegistrationDto customerDto,
-                                   BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-
-        // Custom validation for password match and existing email
-        if (!customerDto.getPassword().equals(customerDto.getConfirmPassword())) {
-            result.rejectValue("confirmPassword", "error.customerDto", "Passwords do not match");
+    @PostMapping("/register/save")
+    public String registration(@Valid @ModelAttribute("customer") CustomerDto customerDto,
+                               BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+        if (customerService.existsByEmail(customerDto.getEmail())) {
+            result.rejectValue("email", null, "There is already an account registered with that email");
         }
-        if (customerService.emailExists(customerDto.getEmail())) {
-             result.rejectValue("email", "error.customerDto", "An account already exists for this email");
-        }
-
-
         if (result.hasErrors()) {
-            model.addAttribute("customerDto", customerDto); // Keep data in form
+            model.addAttribute("customer", customerDto);
             return "register";
         }
 
         try {
-            customerService.registerCustomer(customerDto);
-            redirectAttributes.addFlashAttribute("successMessage", "Registration successful! Please login.");
-            return "redirect:/login";
+            customerService.saveCustomer(customerDto);
+            redirectAttributes.addFlashAttribute("successMessage", "Registration successful! Please log in.");
+            return "redirect:/login"; // Redirect to login after successful registration
         } catch (IllegalArgumentException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("customerDto", customerDto);
-            return "register";
+             model.addAttribute("errorMessage", e.getMessage());
+             model.addAttribute("customer", customerDto); // Add DTO back to model
+             return "register";
         }
+    }
+
+    @GetMapping("/admin/login")
+    public String adminLoginForm() {
+        return "admin/login"; // templates/admin/login.html
     }
 }

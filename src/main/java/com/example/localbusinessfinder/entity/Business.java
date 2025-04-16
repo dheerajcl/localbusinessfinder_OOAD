@@ -7,6 +7,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "businesses")
@@ -40,9 +42,16 @@ public class Business {
     @Lob // For potentially long text
     private String description;
 
-    @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Booking> bookings;
+    @Column(name = "phone")
+    private String phone;
 
     @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Rating> ratings;
+    private List<Booking> bookings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Rating> ratings = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "business_admin_id", referencedColumnName = "id")
+    private BusinessAdmin businessAdmin;
 }
