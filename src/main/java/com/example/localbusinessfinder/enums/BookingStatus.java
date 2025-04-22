@@ -7,5 +7,6 @@ public enum BookingStatus {
     CANCELLED_PENALTY,  // Cancelled after grace period
     AWAITING_FINAL_PAYMENT, // Adjusted price set, waiting for final payment
     FULLY_PAID, // Final payment done
-    COMPLETED_PENDING_RATING // Service done, rating possible (optional distinct state)
+    COMPLETED_PENDING_RATING, // Service done, rating possible (optional distinct state)
+    COMPLETED_RATED // Service done and rating provided
 }

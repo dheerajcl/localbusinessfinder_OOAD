@@ -201,4 +201,44 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
+    // Add method to find bookings by business admin email
+    public List<Booking> findBookingsByBusinessAdminEmail(String adminEmail) {
+        logger.debug("Finding bookings for business admin email: {}", adminEmail);
+        Optional<Business> businessOpt = businessRepository.findByBusinessAdmin_Email(adminEmail);
+        if (businessOpt.isEmpty()) {
+            throw new EntityNotFoundException("No business found for admin with email: " + adminEmail);
+        }
+        return bookingRepository.findByBusiness_IdOrderByBookingDateDesc(businessOpt.get().getId());
+    }
+    
+    // Add method to get active/live bookings (not cancelled or completed)
+    public List<Booking> findActiveBookingsByBusinessAdminEmail(String adminEmail) {
+        logger.debug("Finding active bookings for business admin email: {}", adminEmail);
+        Optional<Business> businessOpt = businessRepository.findByBusinessAdmin_Email(adminEmail);
+        if (businessOpt.isEmpty()) {
+            throw new EntityNotFoundException("No business found for admin with email: " + adminEmail);
+        }
+        List<Booking> allBookings = bookingRepository.findByBusiness_IdOrderByBookingDateDesc(businessOpt.get().getId());
+        // Filter for active bookings (CONFIRMED or AWAITING_FINAL_PAYMENT)
+        return allBookings.stream()
+                .filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED || 
+                                  booking.getStatus() == BookingStatus.AWAITING_FINAL_PAYMENT)
+                .toList();
+    }
+    
+    // Add method to get completed bookings
+    public List<Booking> findCompletedBookingsByBusinessAdminEmail(String adminEmail) {
+        logger.debug("Finding completed bookings for business admin email: {}", adminEmail);
+        Optional<Business> businessOpt = businessRepository.findByBusinessAdmin_Email(adminEmail);
+        if (businessOpt.isEmpty()) {
+            throw new EntityNotFoundException("No business found for admin with email: " + adminEmail);
+        }
+        List<Booking> allBookings = bookingRepository.findByBusiness_IdOrderByBookingDateDesc(businessOpt.get().getId());
+        // Filter for completed bookings
+        return allBookings.stream()
+                .filter(booking -> booking.getStatus() == BookingStatus.COMPLETED_PENDING_RATING || 
+                                  booking.getStatus() == BookingStatus.FULLY_PAID)
+                .toList();
+    }
+
 }

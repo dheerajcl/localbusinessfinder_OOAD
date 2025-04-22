@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class RatingService {
 
@@ -120,13 +122,21 @@ public class RatingService {
         Rating savedRating = ratingRepository.save(rating);
         logger.info("Rating successfully created with ID {} for booking {}", savedRating.getId(), booking.getId());
 
-        // 6. Optional: Update Booking Status (e.g., if you have a final 'COMPLETED' status)
-        // if (booking.getStatus() == BookingStatus.COMPLETED_PENDING_RATING) {
-        //     booking.setStatus(BookingStatus.COMPLETED); // Or whatever your final status is
-        //     bookingRepository.save(booking);
-        //     logger.info("Updated booking {} status to COMPLETED after rating.", booking.getId());
-        // }
+        // Update the average rating for the business
+        Business business = booking.getBusiness();
+        businessService.updateBusinessRating(business.getId());
+
+        // Update Booking Status to COMPLETED_RATED
+        booking.setStatus(BookingStatus.COMPLETED_RATED);
+        bookingRepository.save(booking);
+        logger.info("Updated booking {} status to COMPLETED_RATED after rating.", booking.getId());
 
         return savedRating;
+    }
+
+    // Add method to get all ratings for a business
+    public List<Rating> getBusinessRatings(Long businessId) {
+        logger.info("Getting all ratings for business ID: {}", businessId);
+        return ratingRepository.findByBusiness_IdOrderByRatingTimestampDesc(businessId);
     }
 }

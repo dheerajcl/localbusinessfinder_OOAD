@@ -2,9 +2,13 @@ package com.example.localbusinessfinder.controller;
 
 import com.example.localbusinessfinder.dto.BusinessAdminDto;
 import com.example.localbusinessfinder.dto.BusinessDto;
+import com.example.localbusinessfinder.entity.Booking;
 import com.example.localbusinessfinder.entity.Business;
+import com.example.localbusinessfinder.entity.Rating;
+import com.example.localbusinessfinder.service.BookingService;
 import com.example.localbusinessfinder.service.BusinessAdminService;
 import com.example.localbusinessfinder.service.BusinessService;
+import com.example.localbusinessfinder.service.RatingService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +21,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Controller
 @RequestMapping("/admin") // Base path for all admin actions
@@ -30,6 +37,12 @@ public class AdminController {
 
     @Autowired
     private BusinessService businessService;
+
+    @Autowired
+    private BookingService bookingService;
+
+    @Autowired
+    private RatingService ratingService;
 
     // --- Registration ---
 
@@ -71,12 +84,35 @@ public class AdminController {
 
         Optional<Business> businessOpt = businessService.findBusinessByAdminEmail(adminEmail);
         if (businessOpt.isPresent()) {
-            model.addAttribute("business", businessOpt.get());
-             model.addAttribute("businessDto", businessService.convertEntityToDto(businessOpt.get())); // For potential edit form display
+            Business business = businessOpt.get();
+            model.addAttribute("business", business);
+            model.addAttribute("businessDto", businessService.convertEntityToDto(business)); // For potential edit form display
+            
+            // Fetch active and completed bookings
+            try {
+                List<Booking> activeBookings = bookingService.findActiveBookingsByBusinessAdminEmail(adminEmail);
+                List<Booking> completedBookings = bookingService.findCompletedBookingsByBusinessAdminEmail(adminEmail);
+                
+                model.addAttribute("activeBookings", activeBookings);
+                model.addAttribute("completedBookings", completedBookings);
+                model.addAttribute("now", LocalDateTime.now()); // For displaying current time
+                
+                logger.info("Loaded {} active bookings and {} completed bookings for business admin: {}", 
+                    activeBookings.size(), completedBookings.size(), adminEmail);
+                    
+                // Fetch ratings for the business
+                List<Rating> ratings = ratingService.getBusinessRatings(business.getId());
+                model.addAttribute("ratings", ratings);
+                logger.info("Loaded {} ratings for business admin: {}", ratings.size(), adminEmail);
+                
+            } catch (Exception e) {
+                logger.error("Error fetching data for admin {}: {}", adminEmail, e.getMessage(), e);
+                model.addAttribute("bookingErrorMessage", "Could not load data: " + e.getMessage());
+            }
         } else {
-             model.addAttribute("message", "You haven't added your business listing yet.");
-             // Optionally provide DTO for add form if dashboard includes adding
-             // model.addAttribute("businessDto", new BusinessDto());
+            model.addAttribute("message", "You haven't added your business listing yet.");
+            // Optionally provide DTO for add form if dashboard includes adding
+            // model.addAttribute("businessDto", new BusinessDto());
         }
         model.addAttribute("adminEmail", adminEmail); // Pass admin email if needed
         return "admin/dashboard"; // templates/admin/dashboard.html
@@ -162,6 +198,116 @@ public class AdminController {
              model.addAttribute("errorMessage", "An unexpected error occurred while updating the business.");
               model.addAttribute("pageTitle", "Edit Your Business");
              return "admin/business-form";
+        }
+    }
+
+    // Add a booking detail view endpoint
+    @GetMapping("/bookings/{bookingId}")
+    public String viewBookingDetails(@PathVariable Long bookingId, Model model, Principal principal, RedirectAttributes redirectAttributes) {
+        if (principal == null) return "redirect:/login";
+        String adminEmail = principal.getName();
+        
+        logger.info("Admin {} attempting to view booking {}", adminEmail, bookingId);
+        
+        try {
+            // Get the business first to verify ownership
+            Optional<Business> businessOpt = businessService.findBusinessByAdminEmail(adminEmail);
+            if (businessOpt.isEmpty()) {
+                logger.warn("No business found for admin {}", adminEmail);
+                redirectAttributes.addFlashAttribute("errorMessage", "No business found for your account.");
+                return "redirect:/admin/dashboard";
+            }
+            
+            Business business = businessOpt.get();
+            logger.debug("Found business ID {} for admin {}", business.getId(), adminEmail);
+            
+            // Get the booking
+            Optional<Booking> bookingOpt = bookingService.findBookingById(bookingId);
+            if (bookingOpt.isEmpty()) {
+                logger.warn("Booking ID {} not found for admin {}", bookingId, adminEmail);
+                redirectAttributes.addFlashAttribute("errorMessage", "Booking not found.");
+                return "redirect:/admin/dashboard";
+            }
+            
+            Booking booking = bookingOpt.get();
+            
+            // Verify that the booking belongs to this business
+            if (booking.getBusiness() == null || business.getId() == null || 
+                !booking.getBusiness().getId().equals(business.getId())) {
+                logger.warn("Access denied: Booking {} does not belong to business {} of admin {}", 
+                           bookingId, business.getId(), adminEmail);
+                redirectAttributes.addFlashAttribute("errorMessage", "Access denied: This booking does not belong to your business.");
+                return "redirect:/admin/dashboard";
+            }
+            
+            logger.debug("Found booking ID {} for business ID {}", booking.getId(), business.getId());
+            
+            // Ensure customer is loaded properly
+            if (booking.getCustomer() == null) {
+                logger.warn("Booking {} has no associated customer", bookingId);
+                // Continue without customer data - template will handle it
+            }
+            
+            model.addAttribute("booking", booking);
+            model.addAttribute("business", business);
+            model.addAttribute("now", LocalDateTime.now());
+            
+            return "admin/booking-detail"; // admin/booking-detail.html
+        } catch (Exception e) {
+            logger.error("Error viewing booking details for admin {} and booking {}: {}", 
+                        adminEmail, bookingId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error loading booking details: " + e.getMessage());
+            return "redirect:/admin/dashboard";
+        }
+    }
+
+    // Add method to set adjusted price for a booking
+    @PostMapping("/bookings/{bookingId}/set-price")
+    public String setAdjustedPrice(@PathVariable Long bookingId,
+                                  @RequestParam("adjustedPrice") BigDecimal adjustedPrice,
+                                  Principal principal,
+                                  RedirectAttributes redirectAttributes) {
+        if (principal == null) return "redirect:/login";
+        String adminEmail = principal.getName();
+        
+        try {
+            // Get the business first to verify ownership
+            Optional<Business> businessOpt = businessService.findBusinessByAdminEmail(adminEmail);
+            if (businessOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "No business found for your account.");
+                return "redirect:/admin/dashboard";
+            }
+            
+            Business business = businessOpt.get();
+            
+            // Get the booking
+            Optional<Booking> bookingOpt = bookingService.findBookingById(bookingId);
+            if (bookingOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Booking not found.");
+                return "redirect:/admin/dashboard";
+            }
+            
+            Booking booking = bookingOpt.get();
+            
+            // Verify that the booking belongs to this business
+            if (!booking.getBusiness().getId().equals(business.getId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Access denied: This booking does not belong to your business.");
+                return "redirect:/admin/dashboard";
+            }
+            
+            // Set adjusted price
+            bookingService.setAdjustedPrice(bookingId, adjustedPrice);
+            
+            redirectAttributes.addFlashAttribute("successMessage", "Final price set successfully. Waiting for customer payment.");
+            return "redirect:/admin/bookings/" + bookingId;
+        } catch (IllegalArgumentException e) {
+            logger.warn("Failed to set adjusted price for booking {}: {}", bookingId, e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Invalid price: " + e.getMessage());
+            return "redirect:/admin/bookings/" + bookingId;
+        } catch (Exception e) {
+            logger.error("Error setting adjusted price for booking {}: {}", bookingId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error setting price: " + e.getMessage());
+            return "redirect:/admin/bookings/" + bookingId;
         }
     }
 } 

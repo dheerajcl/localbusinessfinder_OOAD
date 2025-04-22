@@ -7,6 +7,9 @@ import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ratings")
@@ -33,4 +36,8 @@ public class Rating {
 
     @Lob
     private String comment;
+    
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime ratingTimestamp;
 }

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: headerfiles(title='Booking Details')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+<div class="content-wrapper">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-calendar2-check me-2"></i>Booking Details</h2>
+            <a th:href="@{/admin/dashboard}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Booking #<span th:text="${booking.id}">123</span></h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Customer Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">Name:</dt>
+                            <dd class="col-sm-8" th:text="${booking.customer != null ? booking.customer.name : 'N/A'}">John Doe</dd>
+                            
+                            <dt class="col-sm-4">Email:</dt>
+                            <dd class="col-sm-8" th:text="${booking.customer != null ? booking.customer.email : 'N/A'}">john@example.com</dd>
+                            
+                            <dt class="col-sm-4">Phone:</dt>
+                            <dd class="col-sm-8" th:text="'Not provided'">555-123-4567</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Booking Details</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">Status:</dt>
+                            <dd class="col-sm-8">
+                                <span th:if="${booking.status != null}" th:class="${
+                                    booking.status.name() == 'CONFIRMED' ? 'badge bg-success' : 
+                                    booking.status.name() == 'AWAITING_FINAL_PAYMENT' ? 'badge bg-warning' :
+                                    booking.status.name() == 'COMPLETED_PENDING_RATING' || booking.status.name() == 'FULLY_PAID' ? 'badge bg-info' :
+                                    booking.status.name() == 'CANCELLED_REFUNDED' || booking.status.name() == 'CANCELLED_PENALTY' ? 'badge bg-danger' :
+                                    'badge bg-secondary'}" 
+                                      th:text="${booking.status}">Status</span>
+                                <span th:if="${booking.status == null}" class="badge bg-secondary">Unknown</span>
+                            </dd>
+                            
+                            <dt class="col-sm-4">Date:</dt>
+                            <dd class="col-sm-8" th:text="${booking.bookingDate != null ? #temporals.format(booking.bookingDate, 'EEEE, MMMM d, yyyy h:mm a') : 'Not scheduled'}">Monday, May 20, 2023 2:30 PM</dd>
+                            
+                            <dt class="col-sm-4">Booked On:</dt>
+                            <dd class="col-sm-8" th:text="${booking.bookingTimestamp != null ? #temporals.format(booking.bookingTimestamp, 'MMMM d, yyyy h:mm a') : 'Unknown'}">May 15, 2023 10:20 AM</dd>
+                        </dl>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h5>Service Request</h5>
+                        <div class="p-3 bg-light rounded">
+                            <p th:text="${booking.issueDescription}">
+                                Issue description provided by the customer...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h5>Payment Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-6">Advance Paid:</dt>
+                            <dd class="col-sm-6" th:text="${booking.advancePaid != null ? #numbers.formatCurrency(booking.advancePaid) : 'Not paid'}">$50.00</dd>
+                            
+                            <dt class="col-sm-6">Adjusted Price:</dt>
+                            <dd class="col-sm-6" th:text="${booking.adjustedPrice != null ? #numbers.formatCurrency(booking.adjustedPrice) : 'Not set'}">$100.00</dd>
+                            
+                            <dt class="col-sm-6">Final Payment:</dt>
+                            <dd class="col-sm-6" th:text="${booking.finalPaid != null ? #numbers.formatCurrency(booking.finalPaid) : 'Not paid'}">$50.00</dd>
+                            
+                            <dt class="col-sm-6">Total Paid:</dt>
+                            <dd class="col-sm-6" th:text="${booking.finalPaid != null && booking.advancePaid != null ? #numbers.formatCurrency(booking.advancePaid.add(booking.finalPaid)) : (booking.advancePaid != null ? #numbers.formatCurrency(booking.advancePaid) : 'N/A')}">$100.00</dd>
+                        </dl>
+                    </div>
+                </div>
+                
+                <!-- Action buttons based on status -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5>Actions</h5>
+                        
+                        <!-- Set adjusted price form (only for CONFIRMED bookings) -->
+                        <div th:if="${booking.status != null && booking.status.name() == 'CONFIRMED'}" class="card mb-3">
+                            <div class="card-body">
+                                <h6>Set Final Price</h6>
+                                <form th:action="@{/admin/bookings/{id}/set-price(id=${booking.id})}" method="post" class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="adjustedPrice" class="form-label">Adjusted Price ($)</label>
+                                        <input type="number" class="form-control" id="adjustedPrice" name="adjustedPrice" 
+                                               th:min="${booking.advancePaid != null ? booking.advancePaid : 0}" step="0.01" required>
+                                        <small class="text-muted">Must be at least the advance amount: <span th:text="${booking.advancePaid != null ? #numbers.formatCurrency(booking.advancePaid) : '$0.00'}">$50.00</span></small>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">Set Final Price</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Other status-based actions can be added here -->
+                        <div th:if="${booking.status != null && (booking.status.name() == 'CANCELLED_REFUNDED' || booking.status.name() == 'CANCELLED_PENALTY')}" class="alert alert-secondary">
+                            This booking has been cancelled. No further actions are available.
+                        </div>
+                        
+                        <div th:if="${booking.status != null && booking.status.name() == 'AWAITING_FINAL_PAYMENT'}" class="alert alert-info">
+                            Waiting for customer to make final payment.
+                        </div>
+                        
+                        <div th:if="${booking.status != null && (booking.status.name() == 'COMPLETED_PENDING_RATING' || booking.status.name() == 'FULLY_PAID')}" class="alert alert-success">
+                            This booking has been completed.
+                        </div>
+                        
+                        <div th:if="${booking.status == null}" class="alert alert-warning">
+                            Unable to determine booking status. No actions available.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html> 
